@@ -9,29 +9,27 @@ const userSchema = new Schema(
       unique: true,
       required: true,
       trim: true,
-    }, //there to ensure the strings you save through the schema are properly trimmed-Stack OverFlow
-  },
-  {
+    },
     email: {
       type: String,
       required: true,
       unique: true,
       match: [/^([a-z0-9_.-]+)@([\da-z.-]+).([a-z.]{2,6})$/], //RegEx Email expression
     },
+    thoughts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Thought",
+      },
+    ],
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
-    thoughts: {
-      totalthoughts: [Thought],
-    },
-  },
-  {
-    friends: {
-      totalfriends: [User],
-    },
-  },
-  {
-    // Mongoose supports two Schema options to transform Objects after querying MongoDb: toJSON and toObject.
-    // Here we are indicating that we want virtuals to be included with our response, overriding the default behavior
     toJSON: {
       virtuals: true,
     },
@@ -39,15 +37,11 @@ const userSchema = new Schema(
   }
 );
 
-// Created a virtual that gets total amount of friends
-userSchema
-  .virtual("friendCount")
-  // Getter
-  .get(function () {
-    return this.friends.totalfriends.length;
-  });
+userSchema.virtual("friendCount").get(function () {
+  return this.friends.length;
+});
 
-// Initialize our User model
-const User = model("user", userSchema);
+const User = model("User", userSchema);
 
 module.exports = User;
+

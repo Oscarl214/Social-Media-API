@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-const Reaction = require("./Reaction");
 
 // Schema to create User model
 const thougtSchema = new Schema(
@@ -26,10 +25,12 @@ const thougtSchema = new Schema(
     },
   },
   {
-    reactions: {
-      totalreplies: [Reaction],
-    },
+    reactions: [{
+      type:Schema.Types.ObjectId,
+      ref: "Reaction",
+    }],
   },
+  
   {
     // Mongoose supports two Schema options to transform Objects after querying MongoDb: toJSON and toObject.
     // Here we are indicating that we want virtuals to be included with our response, overriding the default behavior
