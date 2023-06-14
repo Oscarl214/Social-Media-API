@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-
+const reactionSchema = require("./Reaction");
 // Schema to create User model
 const thougtSchema = new Schema(
   {
@@ -10,6 +10,11 @@ const thougtSchema = new Schema(
       minLength: 1,
       maxLength: 280,
     }, //there to ensure the strings you save through the schema are properly trimmed-Stack OverFlow
+    username: {
+      type: String,
+      required: true,
+    },
+    reactions: [reactionSchema],
   },
   {
     createdAt: {
@@ -18,19 +23,6 @@ const thougtSchema = new Schema(
       get: (date) => date.toISOString().split("T")[0],
     },
   },
-  {
-    username: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    reactions: [{
-      type:Schema.Types.ObjectId,
-      ref: "Reaction",
-    }],
-  },
-  
   {
     // Mongoose supports two Schema options to transform Objects after querying MongoDb: toJSON and toObject.
     // Here we are indicating that we want virtuals to be included with our response, overriding the default behavior
@@ -46,10 +38,10 @@ thougtSchema
   .virtual("reactionCount")
   // Getter
   .get(function () {
-    return this.reactions.totalreplies.length;
+    return this.reactions.length;
   });
 
 // Initialize our User model
-const Thought = model("thought", thougtSchema);
+const Thought = model("Thought", thougtSchema);
 
 module.exports = Thought;

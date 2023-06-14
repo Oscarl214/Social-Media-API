@@ -1,30 +1,44 @@
-const {User, Thought, Reaction}=require('../models');
+const { User, Thought, Reaction } = require("../models");
 
-module.exports={
-
-    async getUsers(req,res){
-        try{
-            const users=await User.find();
-            res.json(users)
-        }catch(err){
-            res.status(500).json(err)
-        }
-    },
-    async getSingleUser(req,res){
-        try{
-            const user=await User.findOne({_id: req.params.userId})
-                .select('-__v')
-                .populate(thoughts)
-                .populate(friends)
-                if(!user){
-                    return res.status(404).json({message: 'No user with this id'})
-                }
-                res.json(user);
-        }catch(err){
-            res.status(500).json(err);
-        }
-    },
-      // create a new user
+module.exports = {
+  async getUsers(req, res) {
+    try {
+      const users = await User.find();
+      res.json(users);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  async getSingleUser(req, res) {
+    try {
+      const user = await User.findOne({ _id: req.params.userId })
+        .select("-__v")
+        .populate(thoughts)
+        .populate(friends);
+      if (!user) {
+        return res.status(404).json({ message: "No user with this id" });
+      }
+      res.json(user);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  async updateUser(req, res) {
+    try {
+      const user = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        req.body, // Update data passed from Insomnia
+        { new: true } // Options object to return the modified document
+      );
+      if (!user) {
+        return res.status(404).json({ message: "No user with this id!" });
+      }
+      res.json(user);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  // create a new user
   async createUser(req, res) {
     try {
       const user = await User.create(req.body);
@@ -39,11 +53,11 @@ module.exports={
       const user = await User.findOneAndDelete({ _id: req.params.userId });
 
       if (!user) {
-        return res.status(404).json({ message: 'No user with that ID' });
+        return res.status(404).json({ message: "No user with that ID" });
       }
 
       await Thought.deleteMany({ _id: { $in: user.thoughts } });
-      res.json({ message: 'User and associated thoughts deleted!' })
+      res.json({ message: "User and associated thoughts deleted!" });
     } catch (err) {
       res.status(500).json(err);
     }
@@ -52,12 +66,12 @@ module.exports={
     try {
       const friendList = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.body._id } },
+        { $addToSet: { friends: req.params.friendId } },
         { runValidators: true, new: true }
       );
 
       if (!friendList) {
-        return res.status(404).json({ message: 'No user with this id!' });
+        return res.status(404).json({ message: "No user with this id!" });
       }
 
       res.json(friendList);
@@ -69,12 +83,12 @@ module.exports={
     try {
       const removeFriend = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $pull: { friends: { tagId: req.params.friendId } } },
+        { $pull: { friends: req.params.friendId } },
         { runValidators: true, new: true }
       );
 
       if (!removeFriend) {
-        return res.status(404).json({ message: 'No user with this id!' });
+        return res.status(404).json({ message: "No user with this id!" });
       }
 
       res.json(removeFriend);
@@ -83,7 +97,3 @@ module.exports={
     }
   },
 };
-
-
-
-
